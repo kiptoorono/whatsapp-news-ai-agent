@@ -1,0 +1,9 @@
+# Ignore large data files
+peopledaily_articles_embedded.json
+peopledaily_articles.json
+standard_articles_trial.json
+summarized_news.txt
+*.zip
+*.exe
+.env
+

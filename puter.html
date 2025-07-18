@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>News Summarizer with Puter.js</title>
+    <script src="https://js.puter.com/v2/"></script>
+</head>
+<body>
+    <textarea id="article" rows="20" cols="80" placeholder="he Senates StandingCommittee on Devolution and Intergovernmental Relationshas approved a legislative proposal seeking to amend the County Governments Act to promote inclusivity and transparency in the hiring of County Executive Committee Members (CECMs).\nThe development took place on Monday, July 14, 2025, at Parliament Buildings, where members of the Committee met both physically and virtually to review the proposal sponsored by Marsabit Senator Mohamed Chute"></textarea><br>
+    <button onclick="summarize()">Summarize</button>
+    <h3>Summary:</h3>
+    <div id="summary"></div>
+    <script>
+        function summarize() {
+            const article = document.getElementById('article').value;
+            const prompt = "Summarize the following news article in exactly 2 sentences. Be factual, neutral, and avoid speculation or opinion. Do not add information that is not present in the article.\n\n" + article;
+            puter.ai.chat(prompt, { model: "gpt-4.1-nano" }).then(response => {
+                document.getElementById('summary').innerText = response;
+            });
+        }
+    </script>
+</body>
+</html>
