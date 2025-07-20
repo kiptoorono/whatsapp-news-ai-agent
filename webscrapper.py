@@ -5,6 +5,22 @@ import time
 from urllib.parse import urljoin
 from requests.exceptions import RequestException, Timeout
 import os
+from datetime import datetime
+import re
+
+# Helper to parse date strings like 'Tuesday 14th July, 2024 12:00 AM'
+def parse_article_date(date_str):
+    if not date_str:
+        return None
+    # Remove ordinal suffixes (st, nd, rd, th)
+    date_str = re.sub(r'(\d{1,2})(st|nd|rd|th)', r'\1', date_str)
+    # Try with time
+    for fmt in ["%A %d %B, %Y %I:%M %p", "%A %d %B, %Y %I %p", "%A %d %B, %Y"]:
+        try:
+            return datetime.strptime(date_str, fmt)
+        except Exception:
+            continue
+    return None
 
 def save_articles(articles, filename='peopledaily_articles.json'):
     with open(filename, 'w', encoding='utf-8') as f:
@@ -20,7 +36,12 @@ def load_existing_articles(filename='peopledaily_articles.json'):
                 return []
     return []
 
-def scrape_category(category_slug, category_name=None, max_pages=100):
+def get_latest_date_for_category(articles, category):
+    dates = [parse_article_date(a['date']) for a in articles if a.get('category') == category and a.get('date')]
+    dates = [d for d in dates if d]
+    return max(dates) if dates else None
+
+def scrape_category(category_slug, category_name=None, max_pages=100, min_date=None, stop_on_existing=True):
     if category_name is None:
         category_name = category_slug
     articles = load_existing_articles()
@@ -29,6 +50,12 @@ def scrape_category(category_slug, category_name=None, max_pages=100):
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
     }
+    # Find latest date for this category if min_date not given
+    if min_date is None:
+        latest = get_latest_date_for_category(articles, category_name)
+        min_date = latest
+    if isinstance(min_date, str):
+        min_date = parse_article_date(min_date)
     start_urls = [
         f"https://peopledaily.digital/{category_slug}",
         f"https://peopledaily.digital/category/{category_slug}"
@@ -37,7 +64,8 @@ def scrape_category(category_slug, category_name=None, max_pages=100):
         url = start_url
         is_first_page = True
         page_count = 0
-        while url and url not in visited_pages and page_count < max_pages:
+        stop_scraping = False
+        while url and url not in visited_pages and page_count < max_pages and not stop_scraping:
             print(f"Scraping page: {url}")
             visited_pages.add(url)
             try:
@@ -56,21 +84,35 @@ def scrape_category(category_slug, category_name=None, max_pages=100):
             soup = BeautifulSoup(resp.text, 'html.parser')
             headlines = soup.find_all('a', href=True)
             page_article_urls = []
+            all_existing = True
             for a in headlines:
                 href = a['href']
                 text = a.get_text(strip=True)
-                if f'/{category_slug}/' in href and href not in seen_urls and text:
-                    article_data = scrape_article_details(text, href, category_name, headers)
-                    if article_data:
-                        articles.append(article_data)
-                        print(f"  Added article: {href}")
-                        if len(articles) % 20 == 0:
-                            save_articles(articles)
-                    seen_urls.add(href)
-                    page_article_urls.append(href)
-                    time.sleep(0.5)
+                if f'/{category_slug}/' in href and text:
+                    if href not in seen_urls:
+                        all_existing = False
+                        article_data = scrape_article_details(text, href, category_name, headers)
+                        if article_data:
+                            article_date = parse_article_date(article_data.get('date'))
+                            if min_date and article_date and article_date <= min_date:
+                                print(f"  Article {href} is older than or equal to min_date. Stopping scrape for this category.")
+                                stop_scraping = True
+                                break
+                            articles.append(article_data)
+                            print(f"  Added article: {href}")
+                            if len(articles) % 20 == 0:
+                                save_articles(articles)
+                        seen_urls.add(href)
+                        page_article_urls.append(href)
+                        time.sleep(0.5)
+                    else:
+                        page_article_urls.append(href)
             if not page_article_urls:
                 print(f"No new articles found in {category_name} on this page.")
+            # If all articles on this page are already in seen_urls, stop if stop_on_existing is True
+            if stop_on_existing and all_existing and page_article_urls:
+                print(f"All articles on this page already exist. Stopping scrape for {category_name}.")
+                break
             # On the first page, look for "Click for more" button
             next_link = None
             if is_first_page:
@@ -123,10 +165,10 @@ def scrape_article_details(title, article_url, category, headers):
         print(f"    Error fetching article: {e}")
         return None
 
-def scrape_multiple_categories(categories, max_pages=100):
+def scrape_multiple_categories(categories, max_pages=100, min_date=None, stop_on_existing=True):
     all_articles = load_existing_articles()
     for cat in categories:
-        all_articles += scrape_category(cat, max_pages=max_pages)
+        all_articles += scrape_category(cat, max_pages=max_pages, min_date=min_date, stop_on_existing=stop_on_existing)
     seen = set()
     unique_articles = []
     for art in all_articles:
@@ -138,4 +180,4 @@ def scrape_multiple_categories(categories, max_pages=100):
 
 if __name__ == "__main__":
     categories = ['business', 'lifestyle', 'insights']
-    scrape_multiple_categories(categories, max_pages=100)
+    scrape_multiple_categories(categories, max_pages=100, stop_on_existing=True) 
