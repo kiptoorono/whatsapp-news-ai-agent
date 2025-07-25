@@ -1,0 +1,50 @@
+2025-07-25 22:37:56,383 - INFO - Loading articles from: C:\Users\Rono\Desktop\Ai agent trial\peopledaily_articles.json
+2025-07-25 22:37:57,020 - INFO - Loaded 6596 valid articles out of 6596
+2025-07-25 22:37:57,021 - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-07-25 22:37:57,030 - INFO - Use pytorch device_name: cpu
+2025-07-25 22:37:57,030 - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-07-25 22:38:12,311 - INFO - Model loaded successfully
+2025-07-25 22:38:12,312 - INFO - Starting embedding generation...
+2025-07-25 22:48:03,893 - INFO - Generated embeddings for 6596 articles
+2025-07-25 22:48:03,896 - INFO - Saving embeddings to: C:\Users\Rono\Desktop\Ai agent trial\peopledaily_articles_embedded.json
+2025-07-25 22:48:09,714 - INFO - Embeddings saved successfully
+2025-07-25 22:48:09,715 - INFO - Connecting to Qdrant at localhost:6333
+2025-07-25 22:48:15,646 - INFO - HTTP Request: GET http://localhost:6333 "HTTP/1.1 200 OK"
+2025-07-25 22:48:17,697 - INFO - HTTP Request: GET http://localhost:6333/collections "HTTP/1.1 200 OK"
+2025-07-25 22:48:17,708 - INFO - Connected to Qdrant successfully
+2025-07-25 22:48:19,725 - INFO - HTTP Request: GET http://localhost:6333/collections "HTTP/1.1 200 OK"
+2025-07-25 22:48:19,728 - INFO - Collection 'peopledaily_articles' already exists
+2025-07-25 22:48:35,486 - INFO - HTTP Request: DELETE http://localhost:6333/collections/peopledaily_articles "HTTP/1.1 200 OK"
+2025-07-25 22:48:35,491 - INFO - Deleted existing collection: peopledaily_articles
+2025-07-25 22:48:37,847 - INFO - HTTP Request: PUT http://localhost:6333/collections/peopledaily_articles "HTTP/1.1 200 OK"
+2025-07-25 22:48:37,850 - INFO - Created collection: peopledaily_articles
+2025-07-25 22:48:37,850 - INFO - Starting upload to Qdrant...
+2025-07-25 22:48:40,683 - INFO - HTTP Request: PUT http://localhost:6333/collections/peopledaily_articles/points?wait=true "HTTP/1.1 200 OK"
+2025-07-25 22:48:42,983 - INFO - HTTP Request: PUT http://localhost:6333/collections/peopledaily_articles/points?wait=true "HTTP/1.1 200 OK"
+2025-07-25 22:48:45,263 - INFO - HTTP Request: PUT http://localhost:6333/collections/peopledaily_articles/points?wait=true "HTTP/1.1 200 OK"
+2025-07-25 22:48:47,551 - INFO - HTTP Request: PUT http://localhost:6333/collections/peopledaily_articles/points?wait=true "HTTP/1.1 200 OK"
+2025-07-25 22:48:49,842 - INFO - HTTP Request: PUT http://localhost:6333/collections/peopledaily_articles/points?wait=true "HTTP/1.1 200 OK"
+2025-07-25 22:48:52,145 - INFO - HTTP Request: PUT http://localhost:6333/collections/peopledaily_articles/points?wait=true "HTTP/1.1 200 OK"
+2025-07-25 22:48:54,412 - INFO - HTTP Request: PUT http://localhost:6333/collections/peopledaily_articles/points?wait=true "HTTP/1.1 200 OK"
+2025-07-25 22:48:56,681 - INFO - HTTP Request: PUT http://localhost:6333/collections/peopledaily_articles/points?wait=true "HTTP/1.1 200 OK"
+2025-07-25 22:48:58,967 - INFO - HTTP Request: PUT http://localhost:6333/collections/peopledaily_articles/points?wait=true "HTTP/1.1 200 OK"
+2025-07-25 22:49:01,293 - INFO - HTTP Request: PUT http://localhost:6333/collections/peopledaily_articles/points?wait=true "HTTP/1.1 200 OK"
+2025-07-25 22:49:03,709 - INFO - HTTP Request: PUT http://localhost:6333/collections/peopledaily_articles/points?wait=true "HTTP/1.1 200 OK"
+2025-07-25 22:49:05,981 - INFO - HTTP Request: PUT http://localhost:6333/collections/peopledaily_articles/points?wait=true "HTTP/1.1 200 OK"
+2025-07-25 22:49:08,265 - INFO - HTTP Request: PUT http://localhost:6333/collections/peopledaily_articles/points?wait=true "HTTP/1.1 200 OK"
+2025-07-25 22:49:10,554 - INFO - HTTP Request: PUT http://localhost:6333/collections/peopledaily_articles/points?wait=true "HTTP/1.1 200 OK"
+2025-07-25 22:49:12,841 - INFO - HTTP Request: PUT http://localhost:6333/collections/peopledaily_articles/points?wait=true "HTTP/1.1 200 OK"
+2025-07-25 22:49:15,131 - INFO - HTTP Request: PUT http://localhost:6333/collections/peopledaily_articles/points?wait=true "HTTP/1.1 200 OK"
+2025-07-25 22:49:17,420 - INFO - HTTP Request: PUT http://localhost:6333/collections/peopledaily_articles/points?wait=true "HTTP/1.1 200 OK"
+2025-07-25 22:49:19,708 - INFO - HTTP Request: PUT http://localhost:6333/collections/peopledaily_articles/points?wait=true "HTTP/1.1 200 OK"
+2025-07-25 22:49:22,029 - INFO - HTTP Request: PUT http://localhost:6333/collections/peopledaily_articles/points?wait=true "HTTP/1.1 200 OK"
+2025-07-25 22:49:24,311 - INFO - HTTP Request: PUT http://localhost:6333/collections/peopledaily_articles/points?wait=true "HTTP/1.1 200 OK"
+2025-07-25 22:49:26,593 - INFO - HTTP Request: PUT http://localhost:6333/collections/peopledaily_articles/points?wait=true "HTTP/1.1 200 OK"
+2025-07-25 22:49:28,917 - INFO - HTTP Request: PUT http://localhost:6333/collections/peopledaily_articles/points?wait=true "HTTP/1.1 200 OK"
+2025-07-25 22:49:31,218 - INFO - HTTP Request: PUT http://localhost:6333/collections/peopledaily_articles/points?wait=true "HTTP/1.1 200 OK"
+2025-07-25 22:49:33,668 - INFO - HTTP Request: PUT http://localhost:6333/collections/peopledaily_articles/points?wait=true "HTTP/1.1 200 OK"
+2025-07-25 22:49:36,044 - INFO - HTTP Request: PUT http://localhost:6333/collections/peopledaily_articles/points?wait=true "HTTP/1.1 200 OK"
+2025-07-25 22:49:38,316 - INFO - HTTP Request: PUT http://localhost:6333/collections/peopledaily_articles/points?wait=true "HTTP/1.1 200 OK"
+2025-07-25 22:49:38,319 - INFO - Upload complete! 6596 articles uploaded successfully
+2025-07-25 22:49:38,346 - INFO - Pipeline completed successfully!
+2025-07-25 22:49:40,545 - INFO - HTTP Request: POST http://localhost:6333/collections/peopledaily_articles/points/search "HTTP/1.1 200 OK"
