@@ -1,7 +1,7 @@
 import json
 import logging
-from typing import List, Dict, Any, Optional
-from datetime import datetime
+from typing import List, Dict, Any, Optional, Tuple
+from datetime import datetime, timedelta
 import re
 import os
 from dotenv import load_dotenv
@@ -400,6 +400,147 @@ URL: {result['url']}
                 break
             except Exception as e:
                 print(f"❌ Error: {e}")
+
+    def parse_time_expression(self, query: str) -> Tuple[str, Optional[str], Optional[str]]:
+        """
+        Parse time expressions from query and return (cleaned_query, start_date, end_date).
+        
+        Examples:
+        - "news from last week" -> ("news", "2025-07-20", "2025-07-27")
+        - "articles from yesterday" -> ("articles", "2025-07-26", "2025-07-26")
+        - "politics this month" -> ("politics", "2025-07-01", "2025-07-31")
+        """
+        now = datetime.now()
+        cleaned_query = query.lower()
+        
+        # Time patterns to match
+        time_patterns = {
+            r'\b(yesterday|yesterday\'s)\b': (now - timedelta(days=1), now - timedelta(days=1)),
+            r'\b(today|today\'s)\b': (now, now),
+            r'\b(last week|past week)\b': (now - timedelta(days=7), now),
+            r'\b(this week)\b': (now - timedelta(days=now.weekday()), now),
+            r'\b(last month|past month)\b': (now - timedelta(days=30), now),
+            r'\b(this month)\b': (now.replace(day=1), now),
+            r'\b(last year|past year)\b': (now - timedelta(days=365), now),
+            r'\b(this year)\b': (now.replace(month=1, day=1), now),
+            r'\b(last 3 days|past 3 days)\b': (now - timedelta(days=3), now),
+            r'\b(last 7 days|past 7 days)\b': (now - timedelta(days=7), now),
+            r'\b(last 30 days|past 30 days)\b': (now - timedelta(days=30), now),
+            r'\b(last 2 weeks|past 2 weeks)\b': (now - timedelta(days=14), now),
+            r'\b(last 3 weeks|past 3 weeks)\b': (now - timedelta(days=21), now),
+        }
+        
+        start_date = None
+        end_date = None
+        
+        for pattern, (start, end) in time_patterns.items():
+            if re.search(pattern, cleaned_query):
+                start_date = start.strftime('%Y-%m-%d')
+                end_date = end.strftime('%Y-%m-%d')
+                # Remove the time expression from the query
+                cleaned_query = re.sub(pattern, '', cleaned_query).strip()
+                break
+        
+        # Handle specific date ranges like "from X to Y"
+        date_range_pattern = r'\bfrom\s+(\d{1,2}(?:st|nd|rd|th)?\s+\w+)\s+to\s+(\d{1,2}(?:st|nd|rd|th)?\s+\w+)\b'
+        match = re.search(date_range_pattern, cleaned_query)
+        if match:
+            try:
+                start_str, end_str = match.groups()
+                # Parse dates (simplified - you might want more robust parsing)
+                start_date = self._parse_relative_date(start_str, now)
+                end_date = self._parse_relative_date(end_str, now)
+                cleaned_query = re.sub(date_range_pattern, '', cleaned_query).strip()
+            except:
+                pass
+        
+        return cleaned_query, start_date, end_date
+    
+    def _parse_relative_date(self, date_str: str, reference_date: datetime) -> str:
+        """Parse relative date expressions like '15th July' or 'last Monday'."""
+        # Remove ordinal suffixes
+        date_str = re.sub(r'(\d{1,2})(st|nd|rd|th)', r'\1', date_str)
+        
+        # Try to parse as "day month" format
+        try:
+            parsed_date = datetime.strptime(date_str, "%d %B")
+            # Use current year
+            return parsed_date.replace(year=reference_date.year).strftime('%Y-%m-%d')
+        except:
+            pass
+        
+        # Handle "last Monday" type expressions
+        weekday_pattern = r'last\s+(\w+)'
+        match = re.search(weekday_pattern, date_str.lower())
+        if match:
+            weekday_name = match.group(1)
+            weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+            if weekday_name in weekdays:
+                target_weekday = weekdays.index(weekday_name)
+                current_weekday = reference_date.weekday()
+                days_back = (current_weekday - target_weekday) % 7
+                if days_back == 0:
+                    days_back = 7
+                target_date = reference_date - timedelta(days=days_back)
+                return target_date.strftime('%Y-%m-%d')
+        
+        return reference_date.strftime('%Y-%m-%d')
+
+    def search_and_summarize_time_aware(
+        self, 
+        query: str, 
+        top_k: int = 3,
+        summary_sentences: int = 2,
+        score_threshold: float = 0.5
+    ) -> str:
+        """
+        Enhanced search that automatically detects and applies time filters.
+        """
+        # Parse time expressions from the query
+        cleaned_query, start_date, end_date = self.parse_time_expression(query)
+        
+        if start_date and end_date:
+            logger.info(f"Time-aware search: '{cleaned_query}' from {start_date} to {end_date}")
+            results = self.search_by_date_range(cleaned_query, start_date, end_date, top_k)
+        else:
+            logger.info(f"Regular search: '{cleaned_query}'")
+            results = self.search_articles(cleaned_query, top_k, score_threshold)
+        
+        if not results:
+            time_info = f" from {start_date} to {end_date}" if start_date and end_date else ""
+            return f"No articles found for query: '{cleaned_query}'{time_info}"
+        
+        formatted_results = []
+        time_info = f" from {start_date} to {end_date}" if start_date and end_date else ""
+        formatted_results.append(f"📰 Search Results for: '{cleaned_query}'{time_info}\n{'='*60}")
+        
+        for i, result in enumerate(results, 1):
+            content = result.get("content", "")
+            
+            # Generate summary if content exists and SambaNova is available
+            if content and self.samba_client:
+                summary = self.summarize_with_sambanova(content, summary_sentences)
+            elif content:
+                # Fallback: use first few sentences
+                sentences = re.split(r'[.!?]+', content)
+                summary = '. '.join(sentences[:summary_sentences]).strip()
+                if summary and not summary.endswith('.'):
+                    summary += '.'
+            else:
+                summary = "[No content available]"
+            
+            # Format result
+            result_text = f"""
+📄 Article {i} (Score: {result['score']:.3f})
+📰 Title: {result['title']}
+📅 Date: {result['date']}
+🏷️ Category: {result['category']}
+📝 Summary: {summary}
+🔗 URL: {result['url']}
+"""
+            formatted_results.append(result_text)
+        
+        return "\n".join(formatted_results)
 
 def main():
     """Main function to start the interactive search agent."""
