@@ -7,6 +7,7 @@ from requests.exceptions import RequestException, Timeout
 import os
 from datetime import datetime
 import re
+import random
 
 # Helper to parse date strings like 'Tuesday 14th July, 2024 12:00 AM'
 def parse_article_date(date_str):
@@ -56,11 +57,22 @@ def get_latest_date_for_category(articles, category):
 def scrape_homepage(articles, seen_urls, seen_titles):
     url = "https://peopledaily.digital/"
     print(f"Scraping homepage: {url}")
+    
+    # Create a session for better request handling
+    session = requests.Session()
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+        "Accept-Encoding": "gzip, deflate",
+        "Connection": "keep-alive",
+        "Upgrade-Insecure-Requests": "1",
+        "Referer": "https://www.google.com/"
     }
+    session.headers.update(headers)
+    
     try:
-        resp = requests.get(url, headers=headers, timeout=15)
+        resp = session.get(url, timeout=15)
         if resp.status_code != 200:
             print(f"Failed to fetch homepage: {url}, status code: {resp.status_code}")
             return
@@ -92,7 +104,7 @@ def scrape_homepage(articles, seen_urls, seen_titles):
                     print(f"  [Homepage] Added article: {href}")
                     if len(articles) % 20 == 0:
                         save_articles(articles)
-                time.sleep(0.5)
+                time.sleep(random.uniform(1, 3))  # Random delay between 1-3 seconds
 
 def scrape_category(category_slug, category_name=None, max_pages=50, stop_on_existing=True):
     if category_name is None:
@@ -102,7 +114,12 @@ def scrape_category(category_slug, category_name=None, max_pages=50, stop_on_exi
     seen_titles = set(a['title'].strip().lower() for a in articles if a.get('title'))
     visited_pages = set()
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+        "Accept-Encoding": "gzip, deflate",
+        "Connection": "keep-alive",
+        "Upgrade-Insecure-Requests": "1"
     }
     start_urls = [
         f"https://peopledaily.digital/{category_slug}",
@@ -146,7 +163,7 @@ def scrape_category(category_slug, category_name=None, max_pages=50, stop_on_exi
                             if len(articles) % 20 == 0:
                                 save_articles(articles)
                         page_article_urls.append(href)
-                        time.sleep(0.5)
+                        time.sleep(random.uniform(1, 3))  # Random delay between 1-3 seconds
                     else:
                         page_article_urls.append(href)
             if not page_article_urls:
@@ -174,7 +191,7 @@ def scrape_category(category_slug, category_name=None, max_pages=50, stop_on_exi
             else:
                 url = None
             page_count += 1
-            time.sleep(1)
+            time.sleep(random.uniform(2, 5))  # Random delay between 2-5 seconds
     save_articles(articles)
     return articles
 

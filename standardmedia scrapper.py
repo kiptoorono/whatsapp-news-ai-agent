@@ -274,7 +274,7 @@ class StandardMediaScraper:
 
     def scrape_all_sections(self):
         """Scrape all defined sections."""
-        print("🚀 Starting Standard Media comprehensive scrape...")
+        print(" Starting Standard Media comprehensive scrape...")
         
         for section_name, section_url in self.sections.items():
             try:
@@ -284,7 +284,7 @@ class StandardMediaScraper:
                 print(f"❌ Error scraping section {section_name}: {e}")
                 continue
         
-        print(f"\n✅ Scraping complete! Total articles: {len(self.articles)}")
+        print(f"\n Scraping complete! Total articles: {len(self.articles)}")
         self.print_final_tallies()
 
     def print_section_tallies(self):
@@ -319,7 +319,7 @@ class StandardMediaScraper:
         """Save final results to file."""
         with open(filename, "w", encoding="utf-8") as f:
             json.dump(self.articles, f, ensure_ascii=False, indent=2)
-        print(f"✅ Saved {len(self.articles)} articles to {filename}")
+        print(f" Saved {len(self.articles)} articles to {filename}")
 
 if __name__ == "__main__":
     scraper = StandardMediaScraper(max_articles_per_section=30)

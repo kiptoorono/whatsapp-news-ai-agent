@@ -2,6 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 import time
+import os
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from openai import OpenAI
@@ -43,15 +44,26 @@ def get_last_incoming_message(driver):
             return messages[-1].text
     return None
 
-# SambaNova client for general chat and summarization (existing)
+# Load API keys from environment variables
+SAMBA_API_KEY = os.getenv("SAMBA_API_KEY")
+SAMBA_CATEGORIZE_API_KEY = os.getenv("SAMBA_CATEGORIZE_API_KEY")
+
+if not SAMBA_API_KEY:
+    raise RuntimeError("Environment variable 'SAMBA_API_KEY' is not set.")
+
+if not SAMBA_CATEGORIZE_API_KEY:
+    raise RuntimeError("Environment variable 'SAMBA_CATEGORIZE_API_KEY' is not set.")
+
+# SambaNova client for general chat and summarization
 client_samba = OpenAI(
     base_url="https://api.sambanova.ai/v1",
-    api_key="4cbd0c7f-db95-46fa-bdaa-586cd6ec9d24"  # Summarization/chat key
+    api_key=SAMBA_API_KEY,
 )
-# SambaNova client for categorization/classification (new)
+
+# SambaNova client for categorization/classification
 client_samba_categorize = OpenAI(
     base_url="https://api.sambanova.ai/v1",
-    api_key="9c2e5acb-80de-4c94-906f-3e1cd7b84720"  # Categorization key
+    api_key=SAMBA_CATEGORIZE_API_KEY,
 )
 
 def is_news_query_llm(message):

@@ -48,3 +48,19 @@
 2025-07-25 22:49:38,319 - INFO - Upload complete! 6596 articles uploaded successfully
 2025-07-25 22:49:38,346 - INFO - Pipeline completed successfully!
 2025-07-25 22:49:40,545 - INFO - HTTP Request: POST http://localhost:6333/collections/peopledaily_articles/points/search "HTTP/1.1 200 OK"
+2025-07-30 21:37:25,947 - INFO - Loading articles from: C:\Users\Rono\Desktop\Ai agent trial\peopledaily_articles.json
+2025-07-30 21:37:26,784 - INFO - Loaded 6900 valid articles out of 6900
+2025-07-30 21:37:26,786 - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-07-30 21:37:26,791 - INFO - Use pytorch device_name: cpu
+2025-07-30 21:37:26,791 - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-07-30 21:37:37,329 - INFO - Model loaded successfully
+2025-07-30 21:37:37,329 - INFO - Starting embedding generation...
+2025-07-30 22:01:00,669 - INFO - Generated embeddings for 6900 articles
+2025-07-30 22:01:00,669 - INFO - Saving embeddings to: C:\Users\Rono\Desktop\Ai agent trial\peopledaily_articles_embedded.json
+2025-07-30 22:01:14,078 - INFO - Embeddings saved successfully
+2025-07-30 22:01:14,078 - INFO - Connecting to Qdrant at localhost:6333
+2025-07-30 22:01:19,919 - INFO - HTTP Request: GET http://localhost:6333 "HTTP/1.1 200 OK"
+2025-07-30 22:01:22,013 - INFO - HTTP Request: GET http://localhost:6333/collections "HTTP/1.1 200 OK"
+2025-07-30 22:01:22,071 - INFO - Connected to Qdrant successfully
+2025-07-30 22:01:24,153 - INFO - HTTP Request: GET http://localhost:6333/collections "HTTP/1.1 200 OK"
+2025-07-30 22:01:24,158 - INFO - Collection 'peopledaily_articles' already exists
